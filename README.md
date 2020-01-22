@@ -75,13 +75,14 @@ if you change it and remember to adjust code in statistics.lua
 Get statistics
 -------------
 Add the following location block to the server block
-'''
+
+```
 location /statistics {
     default_type 'application/json';
     content_by_lua_file "/path/to/lua-nginx-statistics/statistics_output.lua";
     access_log off;
 }      
-'''
+```
 
 Get nginx statistics with json format.
 Via "http://127.0.0.1:2019/statistics"
