@@ -74,9 +74,14 @@ if you change it and remember to adjust code in statistics.lua
 
 Get statistics
 -------------
-**syntax:** `statistics.get_statistics()`
-
-**context:** *any*
+Add the following location block to the server block
+'''
+location /statistics {
+    default_type 'application/json';
+    content_by_lua_file "/path/to/lua-nginx-statistics/statistics_output.lua";
+    access_log off;
+}      
+'''
 
 Get nginx statistics with json format.
 Via "http://127.0.0.1:2019/statistics"
@@ -84,12 +89,12 @@ One typical output is:
 ```
 {
 	backend: {
-		err_count: 1,
-		upstream_count: 11,
-		upstream_response_time: 9.037,
-		request_time: 9.451,
-		err_count|499: 1,
-		request_count: 9
+	    err_count: 1,
+	    upstream_count: 11,
+	    upstream_response_time: 9.037,
+	    request_time: 9.451,
+	    err_count|499: 1,
+	    request_count: 9
 	}
 }
 
