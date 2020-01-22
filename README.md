@@ -123,6 +123,7 @@ Copyright (c) 2017 xiaoxuanzi xiaoximou@gmail.com
 See Also
 ========
 * the ngx_lua module: https://github.com/openresty/lua-nginx-module
+* Alphabetical index of variables: http://nginx.org/en/docs/varindex.html
 * falcon-ngx_metric: https://github.com/GuyCheung/falcon-ngx_metric
 [Back to TOC](#table-of-contents)
 
