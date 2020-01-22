@@ -1,7 +1,7 @@
 Name
 ====
 
-lua-upstream-statistics - Provides statistics for each backend server in nginx upstreams
+lua-nginx-statistics - Provides statistics for each upstream server in nginx.
 
 Table of Contents
 =================
@@ -12,7 +12,6 @@ Table of Contents
 * [Description](#description)
 * [Methods](#methods)
 * [Installation](#installation)
-* [TODO](#todo)
 * [Author](#author)
 * [Copyright and License](#copyright-and-license)
 * [See Also](#see-also)
@@ -27,50 +26,41 @@ Synopsis
 
 ```nginx
 http {
-    lua_package_path "/path/to/lua-upstream-statistics/lib/?.lua;;";
 
-    upstream test {
-        server 127.0.0.1:12334;
-        server 127.0.0.1:12335;
-    }
-    
-    lua_shared_dict upstream_statistics 10m;
+	lua_shared_dict statistics_dict 10M;
+    lua_package_path "/path/to/lua-nginx-statistics/?.lua;;";
+	log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
 
-    init_by_lua_block{
-        local statistics = require("statistics.statistics")
-        statistics.init()
-    }
-
-    init_worker_by_lua_block{
-        local statistics = require("statistics.statistics")
-        statistics.init_works()
-    }
-
-    log_by_lua_block{
-        local statistic = require("statistics.statistics")
-        statistics.log()
+    upstream backend{
+        server 0.0.0.0:2020;
     }
 
     server {
-        ...
-        location =/statistics {
-            default_type 'text/html';
-            content_by_lua_block{
-                local st = require("statistics.statistics")
-                st.get_statistics()
-            }
+        listen       2019;
+        location /test {
+			proxy_pass http://backend;
         }
 
-       location /test {
-            default_type 'text/html';
-            access_by_lua_block{
-                ngx.ctx.upstream_name = 'test'
-            }
-            proxy_pass http://test;
-        }
+        location /statistics {
+			default_type 'application/json';
+			content_by_lua_file "/path/to/lua-nginx-statistics/statistics_output.lua";
+			access_log off;
+		}
 
     }
+
+    server {
+        listen       2020;
+        location /test {
+            default_type 'text/html';
+            content_by_lua_block{
+				ngx.sleep(1)
+                ngx.say('hello 2020')
+            }
+        }
+    }
 }
+
 ```
 
 Description
@@ -78,98 +68,41 @@ Description
 
 This library provides statistics for each backend server in nginx upstreams.
 
+The default prefix is $proxy_host, you can set anyone you like in location,
+if you change it and remember to adjust code in statistics.lua
 [Back to TOC](#table-of-contents)
 
-Methods
-=======
-init
--------------
-**syntax:** `statistics.init()`
-
-**context:** *init_by_lua&#42;*
-
-Initialize global variables to store upstream statistic 
-
-log
--------------
-**syntax:** `statistics.log()`
-
-**context:** *log_by_lua&#42;*
-
-Gather upstream data 
-
-get_statistics
+Get statistics
 -------------
 **syntax:** `statistics.get_statistics()`
 
 **context:** *any*
 
-Get upstream statistics with json format.
+Get nginx statistics with json format.
+Via "http://127.0.0.1:2019/statistics"
 One typical output is:
 ```
 {
-    nginx_info: {
-        address: "192.168.46.110",
-        time_iso8601: "2017-06-22T09:30:25+08:00",
-        nginx_version: "1.11.2",
-        timestamp: 1498095025252,
-        pid: 25625
-    },
-    upstream_statistics: {
-        test: {
-            127.0.0.1:12334: {
-                responses: {
-                    1xx: 0,
-                    2xx: 3,
-                    3xx: 0,
-                    4xx: 0,
-                    5xx: 0,
-                    total_now: 3,
-                    total_last: 3,
-                    qps: 0,
-                    body_bytes_sent_now: 30,
-                    body_bytes_sent_last: 30,
-                    body_bytes_sent_avg: 0,
-                    request_length_now: 1236,
-                    request_length_last: 1236,
-                    request_length_avg: 0,
-                    request_time_now: 3.005,
-                    request_time_last: 3.005
-                    request_time_avg: 0,
-                }
-                upstreams: {
-                    -xx: 0,
-                    1xx: 0,
-                    2xx: 3,
-                    3xx: 0
-                    4xx: 0,
-                    5xx: 0,
-                    total_now: 3,
-                    total_last: 3,
-                    qps: 0,
-                    upstream_response_length_now: 30,
-                    upstream_response_length_last: 30,
-                    upstream_response_length_avg: 0,
-                    upstream_response_time_last: 3.005,
-                    upstream_response_time_now: 3.005,
-                    upstream_response_time_avg: 0,
-                }
-            }
-        }
-    }
+	backend: {
+		err_count: 1,
+		upstream_count: 11,
+		upstream_response_time: 9.037,
+		request_time: 9.451,
+		err_count|499: 1,
+		request_count: 9
+	}
 }
 
 ```
 
 Installation
 ============
-Copy the statistics directory to a location which is in the seaching path of lua require module 
-
-[Back to TOC](#table-of-contents)
-
-TODO
-====
-Use Test::Nginx to test
+You need to configure the lua_package_path directive to add the path of your lua-nginx-statistics source tree to ngx_lua's Lua module search path, as in 
+```
+	lua_shared_dict statistics_dict 10M;
+    lua_package_path "/path/to/lua-nginx-statistics/?.lua;;";
+	log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
+```
 
 [Back to TOC](#table-of-contents)
 
