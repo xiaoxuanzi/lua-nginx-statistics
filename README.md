@@ -27,9 +27,9 @@ Synopsis
 ```nginx
 http {
 
-	lua_shared_dict statistics_dict 10M;
+    lua_shared_dict statistics_dict 10M;
     lua_package_path "/path/to/lua-nginx-statistics/?.lua;;";
-	log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
+    log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
 
     upstream backend{
         server 0.0.0.0:2020;
@@ -99,9 +99,9 @@ Installation
 ============
 You need to configure the lua_package_path directive to add the path of your lua-nginx-statistics source tree to ngx_lua's Lua module search path, as in 
 ```
-	lua_shared_dict statistics_dict 10M;
+    lua_shared_dict statistics_dict 10M;
     lua_package_path "/path/to/lua-nginx-statistics/?.lua;;";
-	log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
+    log_by_lua_file "/path/to/lua-nginx-statistics/statistics.lua";
 ```
 
 [Back to TOC](#table-of-contents)
