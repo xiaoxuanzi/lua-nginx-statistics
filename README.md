@@ -38,14 +38,14 @@ http {
     server {
         listen       2019;
         location /test {
-			proxy_pass http://backend;
+	    proxy_pass http://backend;
         }
 
         location /statistics {
-			default_type 'application/json';
-			content_by_lua_file "/path/to/lua-nginx-statistics/statistics_output.lua";
-			access_log off;
-		}
+	    default_type 'application/json';
+	    content_by_lua_file "/path/to/lua-nginx-statistics/statistics_output.lua";
+	    access_log off;
+	}
 
     }
 
@@ -54,7 +54,7 @@ http {
         location /test {
             default_type 'text/html';
             content_by_lua_block{
-				ngx.sleep(1)
+		ngx.sleep(1)
                 ngx.say('hello 2020')
             }
         }
